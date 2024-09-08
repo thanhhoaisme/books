@@ -20,7 +20,7 @@ app.use(bodyParser.json());
 app.use('/categories', categoryRoutes);
 app.use('/books', bookRoutes);
 app.use('/users', userRoutes);
-app.use('/cart', cartRoutes);
+app.use('/cart',  cartRoutes); 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/index.html'));
 });

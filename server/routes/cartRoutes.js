@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/db'); // Giả sử bạn đã cấu hình kết nối đến cơ sở dữ liệu
-const { authenticateToken } = require('./authMiddleware'); // Import middleware
+// Import middleware
 
 // Lấy giỏ hàng của người dùng
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/',  async (req, res) => {
   if (!req.user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -21,12 +21,16 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 // Thêm sản phẩm vào giỏ hàng
-router.get('/', authenticateToken, async (req, res) => {
-  if (!req.user) {
+router.post('/',  async (req, res) => {
+  // In ra req.user để kiểm tra
+  console.log(req.user); 
+
+  // Kiểm tra xem req.user có tồn tại và có thuộc tính id không
+  if (!req.user || !req.user.id) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
+
   const userId = req.user.id;
-  console.log('userId:', userId)
   const { bookId, quantity } = req.body;
 
   try {
@@ -47,7 +51,7 @@ router.get('/', authenticateToken, async (req, res) => {
       `;
       const updateValues = [quantity, userId, bookId];
       const updateResult = await pool.query(updateQuery, updateValues);
-      res.status(200).json(updateResult.rows[0]); // Trả về mục giỏ hàng đã cập nhật
+      res.status(200).json(updateResult.rows[0]); 
     } else {
       // Nếu sản phẩm chưa tồn tại, thêm mới vào giỏ hàng
       const insertQuery = `
@@ -57,7 +61,7 @@ router.get('/', authenticateToken, async (req, res) => {
       `;
       const insertValues = [userId, bookId, quantity];
       const insertResult = await pool.query(insertQuery, insertValues);
-      res.status(201).json(insertResult.rows[0]); // Trả về mục giỏ hàng mới
+      res.status(201).json(insertResult.rows[0]); 
     }
   } catch (err) {
     console.error('Error adding to cart:', err);

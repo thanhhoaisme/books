@@ -27,7 +27,7 @@ async function addToCart(bookId) {
             throw new Error('Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.');
         }
 
-        const response = await fetch('http://localhost:8989/cart', { // Sửa đường dẫn API ở đây
+        const response = await fetch('/cart', { // Sửa đường dẫn API ở đây
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -19,11 +19,11 @@ function init() {
             content.append(home);
         })
     });
-    $('#home-container').on('click', '.add-to-cart', function() {
+    $('#home-container').on('click', '.add-to-cart', async function() { // Thêm async vào đây
         const bookId = $(this).data('id');
         if(!bookId) return;
-        addToCart(bookId);
-    });
+         addToCart(bookId); // Sử dụng await để đợi addToCart hoàn thành
+})
 }
 
 export default {
