@@ -10,15 +10,33 @@ $(document).on('submit', '#loginForm', function(e) {
         },
         body: JSON.stringify({ username, password })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.error || 'Đăng nhập thất bại'); 
+            });
+        }
+        return response.json();
+    })
     .then(data => {
         localStorage.setItem('token', data.token);
-        // Redirect to the home page or admin page based on role
+
+        // Cập nhật giao diện sau khi đăng nhập thành công
+        $('#user-info').text(`Welcome, ${username}`); // Hiển thị tên người dùng
+        $('#auth-btn').text('Logout'); // Đổi nút "Login" thành "Logout"
+        $('#auth-btn').off('click').on('click', function () {
+            localStorage.removeItem('token'); 
+            location.reload(); 
+        });
+
+        // Redirect dựa trên role (nếu cần)
         if (data.role === 'admin') {
             location.hash = "#admin";
         } else {
             location.hash = "#home";
         }
-        location.reload();
+    })
+    .catch(error => {
+        alert(error.message); 
     });
 });

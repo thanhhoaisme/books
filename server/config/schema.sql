@@ -17,12 +17,8 @@ CREATE TABLE users (
     username VARCHAR(255) UNIQUE NOT NULL,
     password TEXT NOT NULL,
     role VARCHAR(50) DEFAULT 'user',
-    address_line1 VARCHAR(255) NOT NULL,
-    address_line2 VARCHAR(255),
-    city VARCHAR(100) NOT NULL,
-    state VARCHAR(100) NOT NULL,
-    postal_code VARCHAR(20) NOT NULL,
-    country VARCHAR(100) NOT NULL
+    address VARCHAR(255) NOT NULL,
+ 
 );
 
 
