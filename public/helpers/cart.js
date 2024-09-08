@@ -7,32 +7,54 @@ function getCart() {
 }
 
 function calculateCartItems() {
-    // Get the cart from localStorage (or from your backend API if applicable)
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    
-    // Calculate the total number of items by summing up the quantities
+    const cart = getCart();
     const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-    
     return totalItems;
 }
 
 function saveCart(cart) {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
-    const event = new CustomEvent('cart-updated');
-    window.dispatchEvent(event);
+    window.dispatchEvent(new CustomEvent('cart-updated'));
 }
 
-function addToCart(bookId) {
-    const cart = getCart();
-    const index = cart.findIndex(item => item.id === bookId);
-    
-    if (index === -1) {
-        cart.push({ id: bookId, quantity: 1 });
-    } else {
-        cart[index].quantity += 1;
-    }
+async function addToCart(bookId) {
+    const token = localStorage.getItem('token');
 
-    saveCart(cart);
+    try {
+        if (!token) {
+            throw new Error('Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.');
+        }
+
+        const response = await fetch('/cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ bookId, quantity: 1 })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Lỗi khi thêm vào giỏ hàng');
+        }
+
+        const updatedCartItem = await response.json();
+        const cart = getCart();
+        const existingItemIndex = cart.findIndex(item => item.book_id === bookId);
+
+        if (existingItemIndex === -1) {
+            cart.push(updatedCartItem);
+        } else {
+            cart[existingItemIndex].quantity = updatedCartItem.quantity;
+        }
+
+        saveCart(cart);
+        loadCart(); 
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+        alert(error.message);
+    }
 }
 
 export {
@@ -40,4 +62,4 @@ export {
     calculateCartItems,
     addToCart,
     saveCart,
-}
+};

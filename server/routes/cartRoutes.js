@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/db'); // Giả sử bạn đã cấu hình kết nối đến cơ sở dữ liệu
-const { authenticateToken } = require('./authMiddleware'); 
+const { authenticateToken } = require('./authMiddleware'); // Import middleware
+
 // Lấy giỏ hàng của người dùng
 router.get('/', async (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'Unauthorized' });
-}
+    return res.status(401).json({ error: 'Unauthorized' }); // Hoặc thông báo lỗi phù hợp
+  }
   const userId = req.user.id; // Lấy userId từ middleware xác thực (ví dụ: JWT)
 
   try {
@@ -20,14 +21,17 @@ router.get('/', async (req, res) => {
 });
 
 // Thêm sản phẩm vào giỏ hàng
-router.post('/cart', authenticateToken, async (req, res) => {
+router.post('/', async (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'Unauthorized' }); // Hoặc thông báo lỗi phù hợp
-}
-  const userId = req.user.id; // Lấy userId từ middleware xác thực
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const userId = req.user.id;
   const { bookId, quantity } = req.body;
-  console.log('userId:', userId);
-  console.log('bookId:', bookId);
+
+  if (!bookId || quantity <= 0) {
+    return res.status(400).json({ error: 'Invalid data' });
+  }
 
   try {
     const query = `
@@ -35,7 +39,7 @@ router.post('/cart', authenticateToken, async (req, res) => {
       VALUES ($1, $2, $3)
       ON CONFLICT (user_id, book_id) DO UPDATE
       SET quantity = cart_items.quantity + EXCLUDED.quantity
-      RETURNING *
+      RETURNING id, user_id, book_id, quantity
     `;
     const values = [userId, bookId, quantity];
     const result = await pool.query(query, values);
@@ -44,20 +48,30 @@ router.post('/cart', authenticateToken, async (req, res) => {
     console.error('Error adding to cart:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
+  
 });
+
 
 // Cập nhật số lượng sản phẩm trong giỏ hàng
 router.put('/:itemId', async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   const userId = req.user.id;
   const itemId = req.params.itemId;
   const { quantity } = req.body;
+
+  if (quantity <= 0) {
+    return res.status(400).json({ error: 'Invalid quantity' });
+  }
 
   try {
     const query = `
       UPDATE cart_items 
       SET quantity = $1
       WHERE id = $2 AND user_id = $3
-      RETURNING *
+      RETURNING id, user_id, book_id, quantity
     `;
     const values = [quantity, itemId, userId];
     const result = await pool.query(query, values);
@@ -75,11 +89,15 @@ router.put('/:itemId', async (req, res) => {
 
 // Xóa sản phẩm khỏi giỏ hàng
 router.delete('/:itemId', async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   const userId = req.user.id;
   const itemId = req.params.itemId;
 
   try {
-    const query = 'DELETE FROM cart_items WHERE id = $1 AND user_id = $2';
+    const query = 'DELETE FROM cart_items WHERE id = $1 AND user_id = $2 RETURNING *';
     const result = await pool.query(query, [itemId, userId]);
 
     if (result.rowCount === 0) {
@@ -92,5 +110,6 @@ router.delete('/:itemId', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 module.exports = router;

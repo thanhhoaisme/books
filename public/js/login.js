@@ -24,7 +24,7 @@ $(document).on('submit', '#loginForm', function(e) {
         return response.json();
     })
     .then(data => {
-        localStorage.setItem('token', data.token);
+        localStorage.setItem('token', data.token); 
 
         // Cập nhật giao diện sau khi đăng nhập thành công
         $('#user-info').text(`Welcome, ${username}`); 

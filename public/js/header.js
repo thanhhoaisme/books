@@ -6,26 +6,14 @@ let dropdownContent;
 let categoriesLoaded = false;
 
 function initCategory() {
-    if (categoriesLoaded) return; // Nếu đã tải, không tải lại
+    const dropdownContent = $('#category-dropdown');
+    dropdownContent.empty(); // Clear existing categories before adding new ones
 
-    dropdownContent = $('#category-dropdown');
-
-    // Kiểm tra xem phần tử có tồn tại không
-    if (dropdownContent.length === 0) {
-        console.error('Không tìm thấy phần tử có ID #category-dropdown');
-        return;
-    }
-
-    dropdownContent.empty();
-
-    dropdownContent.append('<a href="#book-list">All Categories</a>');
-
-    // Sử dụng bookServices.categories đã được tải trước đó
+    // Populate dropdown content with categories
+    dropdownContent.append('<a href="#book-list">All Categories</a>'); // Add "All Categories" option at the beginning
     bookServices.categories.forEach(category => {
         dropdownContent.append(`<a href="#book-list?category=${category.id}">${category.name}</a>`);
-    });
-
-    categoriesLoaded = true;
+    })
 }
 
 

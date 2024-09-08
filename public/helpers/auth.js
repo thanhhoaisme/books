@@ -20,13 +20,11 @@ function decodeToken(token) {
         }
 
         const payload = parts[1];
-        const decodedPayload = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
 
-        // Optional: Check for correct Base64 padding
-        if (decodedPayload.length % 4 !== 0) {
-            console.error('Invalid Base64 padding in payload');
-            return null;
-        }
+        // Thêm padding Base64 nếu cần
+        const paddedPayload = payload.padEnd(payload.length + (4 - payload.length % 4) % 4, '='); 
+
+        const decodedPayload = atob(paddedPayload.replace(/-/g, '+').replace(/_/g, '/'));
 
         try {
             return JSON.parse(decodedPayload);

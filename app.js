@@ -5,7 +5,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors');
 const app = express();
 const pool = require('./server/config/db');
-
+const { authenticateToken } = require('./server/routes/authMiddleware'); 
 const userRoutes = require('./server/routes/userRoutes');
 const categoryRoutes= require('./server/routes/categoryRoutes');
 const bookRoutes= require('./server/routes/bookRoutes');
@@ -20,7 +20,7 @@ app.use(bodyParser.json());
 app.use('/categories', categoryRoutes);
 app.use('/books', bookRoutes);
 app.use('/users', userRoutes);
-app.use('/cart', cartRoutes); 
+app.use('/cart', authenticateToken, cartRoutes); 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/index.html'));
 });

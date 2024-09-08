@@ -1,36 +1,31 @@
 const jwt = require('jsonwebtoken');
 
-const authenticateToken = (req, res, next) => {
-    // Lấy token từ header Authorization
-    const token = req.headers['authorization']?.split(' ')[1]; // Kiểm tra null và tách token
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
-    if (!token) {
-        return res.status(401).json({ message: 'Truy cập bị từ chối. Vui lòng đăng nhập.' });
-    }
+    if (token == null) return res.sendStatus(401);
 
-    try {
-        // Xác thực token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // Lưu thông tin người dùng vào req.user
-        next(); // Cho phép tiếp tục xử lý request
-    } catch (err) {
-        // Xử lý lỗi xác thực token
-        if (err instanceof jwt.TokenExpiredError) {
-            return res.status(401).json({ message: 'Token đã hết hạn. Vui lòng đăng nhập lại.' });
-        } else {
-            return res.status(403).json({ message: 'Token không hợp lệ.' });
-        }
-    }
-};
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
+}
+
+
+
+
+// ... (phần còn lại của code)
 
 const authorizeAdmin = (req, res, next) => {
-    if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Truy cập bị từ chối. Bạn không có quyền truy cập.' });
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Access denied' });
     }
     next();
 };
 
 module.exports = {
     authenticateToken,
-    authorizeAdmin
+    authorizeAdmin,
 };
