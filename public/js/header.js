@@ -4,10 +4,14 @@ import bookServices from '../services/bookServices.js';
 let dropdownContent; 
 
 function initCategory() {
-    dropdownContent = $('#category-dropdown');
-    dropdownContent.empty(); 
+    const dropdownContent = $('#category-dropdown');
+    dropdownContent.empty(); // Clear existing categories before adding new ones
 
-    dropdownContent.append('<a href="#book-list">All Categories</a>'); 
+    // Populate dropdown content with categories
+    dropdownContent.append('<a href="#book-list">All Categories</a>'); // Add "All Categories" option at the beginning
+    bookServices.categories.forEach(category => {
+        dropdownContent.append(`<a href="#book-list?category=${category.id}">${category.name}</a>`);
+    })
 }
 
 function searchBookList() {
