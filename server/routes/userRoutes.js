@@ -3,8 +3,8 @@ const router = express.Router();
 const { pool } = require('../config/db'); // Giả sử bạn đã cấu hình kết nối đến cơ sở dữ liệu
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
+const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
 router.post('/register', async (req, res) => {
     const { username, password, role = 'user', address } = req.body;
@@ -65,8 +65,9 @@ router.post('/login', async (req, res) => {
         }
 
         // Tạo JWT token 
+        
         const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
-        console.log("token",token);
+  console.log('Token đã tạo:', token);
         // Gửi token về cho client
         res.json({ token });
     } catch (error) {

@@ -4,11 +4,11 @@ const { pool } = require('../config/db'); // Giả sử bạn đã cấu hình k
 const { authenticateToken } = require('./authMiddleware'); // Import middleware
 
 // Lấy giỏ hàng của người dùng
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'Unauthorized' }); // Hoặc thông báo lỗi phù hợp
+    return res.status(401).json({ error: 'Unauthorized' });
   }
-  const userId = req.user.id; // Lấy userId từ middleware xác thực (ví dụ: JWT)
+  const userId = req.user.id;
 
   try {
     const query = 'SELECT * FROM cart_items WHERE user_id = $1';
@@ -21,95 +21,53 @@ router.get('/', async (req, res) => {
 });
 
 // Thêm sản phẩm vào giỏ hàng
-router.post('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   if (!req.user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
-
   const userId = req.user.id;
+  console.log('userId:', userId)
   const { bookId, quantity } = req.body;
 
-  if (!bookId || quantity <= 0) {
-    return res.status(400).json({ error: 'Invalid data' });
-  }
-
   try {
-    const query = `
-      INSERT INTO cart_items (user_id, book_id, quantity)
-      VALUES ($1, $2, $3)
-      ON CONFLICT (user_id, book_id) DO UPDATE
-      SET quantity = cart_items.quantity + EXCLUDED.quantity
-      RETURNING id, user_id, book_id, quantity
+    // Kiểm tra xem sản phẩm đã có trong giỏ hàng hay chưa
+    const checkQuery = `
+      SELECT * FROM cart_items 
+      WHERE user_id = $1 AND book_id = $2
     `;
-    const values = [userId, bookId, quantity];
-    const result = await pool.query(query, values);
-    res.status(201).json(result.rows[0]);
+    const checkResult = await pool.query(checkQuery, [userId, bookId]);
+
+    if (checkResult.rows.length > 0) {
+      // Nếu sản phẩm đã tồn tại, cập nhật số lượng
+      const updateQuery = `
+        UPDATE cart_items 
+        SET quantity = quantity + $1
+        WHERE user_id = $2 AND book_id = $3
+        RETURNING *
+      `;
+      const updateValues = [quantity, userId, bookId];
+      const updateResult = await pool.query(updateQuery, updateValues);
+      res.status(200).json(updateResult.rows[0]); // Trả về mục giỏ hàng đã cập nhật
+    } else {
+      // Nếu sản phẩm chưa tồn tại, thêm mới vào giỏ hàng
+      const insertQuery = `
+        INSERT INTO cart_items (user_id, book_id, quantity)
+        VALUES ($1, $2, $3)
+        RETURNING *
+      `;
+      const insertValues = [userId, bookId, quantity];
+      const insertResult = await pool.query(insertQuery, insertValues);
+      res.status(201).json(insertResult.rows[0]); // Trả về mục giỏ hàng mới
+    }
   } catch (err) {
     console.error('Error adding to cart:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
-  
 });
 
 
-// Cập nhật số lượng sản phẩm trong giỏ hàng
-router.put('/:itemId', async (req, res) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
 
-  const userId = req.user.id;
-  const itemId = req.params.itemId;
-  const { quantity } = req.body;
 
-  if (quantity <= 0) {
-    return res.status(400).json({ error: 'Invalid quantity' });
-  }
-
-  try {
-    const query = `
-      UPDATE cart_items 
-      SET quantity = $1
-      WHERE id = $2 AND user_id = $3
-      RETURNING id, user_id, book_id, quantity
-    `;
-    const values = [quantity, itemId, userId];
-    const result = await pool.query(query, values);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Item not found in cart' });
-    }
-
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error('Error updating cart item:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Xóa sản phẩm khỏi giỏ hàng
-router.delete('/:itemId', async (req, res) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const userId = req.user.id;
-  const itemId = req.params.itemId;
-
-  try {
-    const query = 'DELETE FROM cart_items WHERE id = $1 AND user_id = $2 RETURNING *';
-    const result = await pool.query(query, [itemId, userId]);
-
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Item not found in cart' });
-    }
-
-    res.json({ message: 'Item removed from cart' });
-  } catch (err) {
-    console.error('Error removing cart item:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
 
 
 module.exports = router;

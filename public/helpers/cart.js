@@ -8,7 +8,9 @@ function getCart() {
 
 function calculateCartItems() {
     const cart = getCart();
+
     const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+
     return totalItems;
 }
 
@@ -25,7 +27,7 @@ async function addToCart(bookId) {
             throw new Error('Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.');
         }
 
-        const response = await fetch('/cart', {
+        const response = await fetch('http://localhost:8989/cart', { // Sửa đường dẫn API ở đây
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -33,7 +35,6 @@ async function addToCart(bookId) {
             },
             body: JSON.stringify({ bookId, quantity: 1 })
         });
-
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || 'Lỗi khi thêm vào giỏ hàng');
@@ -41,6 +42,8 @@ async function addToCart(bookId) {
 
         const updatedCartItem = await response.json();
         const cart = getCart();
+
+        // Sửa lỗi: Tìm kiếm dựa trên book_id thay vì id
         const existingItemIndex = cart.findIndex(item => item.book_id === bookId);
 
         if (existingItemIndex === -1) {

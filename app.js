@@ -9,7 +9,7 @@ const { authenticateToken } = require('./server/routes/authMiddleware');
 const userRoutes = require('./server/routes/userRoutes');
 const categoryRoutes= require('./server/routes/categoryRoutes');
 const bookRoutes= require('./server/routes/bookRoutes');
-const cartRoutes=require('./server/routes/cartRoutes');
+const cartRoutes= require('./server/routes/cartRoutes');
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -20,7 +20,7 @@ app.use(bodyParser.json());
 app.use('/categories', categoryRoutes);
 app.use('/books', bookRoutes);
 app.use('/users', userRoutes);
-app.use('/cart', authenticateToken, cartRoutes); 
+app.use('/cart', cartRoutes);
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/index.html'));
 });
