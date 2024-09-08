@@ -29,7 +29,7 @@ registerForm.addEventListener('submit', function (event) {
         } else {
             // Handle errors (e.g., user already exists)
             response.json().then(data => {
-                alert(`Error: ${data.message}`);
+                alert(`Đăng ký không thành công!`);
             });
         }
     })
