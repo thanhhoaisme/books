@@ -26,7 +26,7 @@ router.post('/register', async (req, res) => {
         res.status(201).json({ userId: result.rows[0].id });
     } catch (error) {
         console.error('Error registering user:', error);
-        if (error.code === '23505') { // Unique violation (username already exists)
+        if (error.code === '23505') { 
             res.status(400).json({ error: 'Username already taken' });
         } else {
             res.status(500).json({ error: 'Internal server error' });
@@ -43,7 +43,7 @@ router.post('/login', async (req, res) => {
         const query = 'SELECT * FROM users WHERE username = $1';
         const result = await pool.query(query, [username]);
         if (result.rows.length === 0) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.status(401).json({ error: 'Đăng nhập thất bại' });
         }
 
         const user = result.rows[0];
@@ -52,7 +52,7 @@ router.post('/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.status(401).json({ error: 'Đăng nhập thất bại' });
         }
 
         // Send back user information instead of a JWT token

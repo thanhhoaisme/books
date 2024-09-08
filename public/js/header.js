@@ -1,14 +1,33 @@
 import { getUserInfo } from "../helpers/auth.js"
 import { calculateCartItems } from "../helpers/cart.js";
 import bookServices from '../services/bookServices.js';
-let dropdownContent; 
+
+let dropdownContent;
+let categoriesLoaded = false;
 
 function initCategory() {
-    dropdownContent = $('#category-dropdown');
-    dropdownContent.empty(); 
+    if (categoriesLoaded) return; // Nếu đã tải, không tải lại
 
-    dropdownContent.append('<a href="#book-list">All Categories</a>'); 
+    dropdownContent = $('#category-dropdown');
+
+    // Kiểm tra xem phần tử có tồn tại không
+    if (dropdownContent.length === 0) {
+        console.error('Không tìm thấy phần tử có ID #category-dropdown');
+        return;
+    }
+
+    dropdownContent.empty();
+
+    dropdownContent.append('<a href="#book-list">All Categories</a>');
+
+    // Sử dụng bookServices.categories đã được tải trước đó
+    bookServices.categories.forEach(category => {
+        dropdownContent.append(`<a href="#book-list?category=${category.id}">${category.name}</a>`);
+    });
+
+    categoriesLoaded = true;
 }
+
 
 function searchBookList() {
     const searchStr = $('#search-input').val();
@@ -18,6 +37,7 @@ function searchBookList() {
         location.hash = '#book-list';
     }
 }
+
 async function init() {
     try {
         const user = await getUserInfo();
@@ -37,18 +57,15 @@ async function init() {
         }
 
         $('#cart-count').text(calculateCartItems());
-        initCategory();
 
-        try {
-            const categories = await bookServices.getCategories();
-            categories.forEach(category => {
-                dropdownContent.append(`<a href="#book-list?category=${category.id}">${category.name}</a>`);
-            });
-        } catch (error) {
-            console.error('Error fetching categories:', error);
-            // Handle the error gracefully, e.g., display an error message in the dropdown
-            dropdownContent.append('<span class="error">Error loading categories</span>');
-        }
+        // Đảm bảo rằng DOM đã được tải đầy đủ và danh mục đã được tải
+        $(document).ready(async function() {
+            // Chỉ tải danh mục nếu chưa được tải
+            if (!categoriesLoaded) {
+                await bookServices.getCategories();
+            }
+            initCategory(); 
+        });
 
         window.addEventListener('cart-updated', function () {
             $('#cart-count').text(calculateCartItems())
@@ -64,7 +81,6 @@ async function init() {
 
     } catch (error) {
         console.error('Error initializing header:', error);
-        // Handle the error gracefully, e.g., display a general error message in the header
     }
 }
 
