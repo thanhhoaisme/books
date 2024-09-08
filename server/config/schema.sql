@@ -18,10 +18,9 @@ drop table books
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,
-    password TEXT NOT NULL,
+    password TEXT NOT NULL CHECK (LENGTH(password) >= 6), -- Thêm dấu phẩy ở đây
     role VARCHAR(50) DEFAULT 'user',
     address VARCHAR(255) NOT NULL
-
 );
 select * from users
 drop table users
