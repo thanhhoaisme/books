@@ -9,8 +9,8 @@ CREATE TABLE books (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     price DECIMAL(10, 2),
-	stock_quantity INT NOT NULL,
-    sold_quantity INT NOT NULL DEFAULT 0,
+	
+     stock_quantity INT NOT NULL DEFAULT 0,
     image VARCHAR(255),
     category_id INTEGER REFERENCES categories(id)
 	
@@ -47,6 +47,8 @@ INSERT INTO categories (name) VALUES
 ('Sách giáo khoa'),
 ('Thiếu nhi'),
 ('Ngoại ngữ');
+
+ALTER TABLE books ALTER COLUMN id SET DEFAULT nextval('books_id_seq');
 
 INSERT INTO books (title, description, price, stock_quantity,image, category_id) VALUES
 ('Mega Livestream - Bề Nổi Tảng Băng Chìm', 'Bóc trần sự thật về hiện tượng Mega Livestream và trang bị cho bạn kiến thức, chiến lược để chinh phục thị trường đầy tiềm năng này!', 62.30,50, '../images/megalivestream-31082024-1.jpg', 1),
