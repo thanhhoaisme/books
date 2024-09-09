@@ -1,0 +1,41 @@
+<!-- Add New Book Modal -->
+<link rel="stylesheet" href="css/addBook.css">
+<div id="addBookModal" class="add-book-modal">
+    <div class="modal-content">
+        <span class="add-book-close-btn">&times;</span>
+        <h2 id="add-book-title">Thêm sách mới</h2>
+        <form id="addBookForm" enctype="multipart/form-data">
+            <input type="hidden" id="bookId" name="id">
+            <div class="form-group">
+                <label for="title">Tiêu đề</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Mô tả</label>
+                <textarea id="description" name="description" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="price">Giá tiền</label>
+                <input type="number" id="price" name="price" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Thể loại</label>
+                <select id="category" name="category" required>
+                    <!-- Populate dynamically with category options -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="stock_quantity">Số lượng tồn kho</label>
+                <input type="number" id="stock_quantity" name="stock_quantity" required min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="image">Hình ảnh</label>
+                <input type="file" id="image" name="image" accept="image/*" required>
+                <p id="currentImageSection">Current image: <img id="currentImage" src="" alt="Current Image" style="max-width: 100px;"></p>
+            </div>
+            <button id="btn-submit-book" type="submit" class="submit-btn">Add Book</button>
+        </form>
+    </div>
+</div>
