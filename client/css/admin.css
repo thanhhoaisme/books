@@ -1,0 +1,60 @@
+.admin-container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.admin-container header {
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+}
+
+.admin-container nav a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.admin-container nav a:hover {
+    text-decoration: underline;
+}
+
+.admin-container .admin-section {
+    margin-top: 20px;
+}
+
+.admin-container button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #71b7e6;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.admin-container button:hover {
+    background-color: #9b59b6;
+}
+
+.admin-container #books-list, .admin-container #cart-items {
+    margin-top: 20px;
+}
+
+.admin-container .book-item, .admin-container .cart-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: white;
+}
+
+.admin-container .book-item img, .cart-item img {
+    max-width: 100px;
+    margin-right: 10px;
+}

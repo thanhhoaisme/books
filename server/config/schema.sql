@@ -3,6 +3,7 @@ CREATE TABLE categories (
     name VARCHAR(255) NOT NULL
 );
 drop table categories
+
 CREATE TABLE books (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -15,6 +16,7 @@ CREATE TABLE books (
 	
 );
 drop table books
+
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,
@@ -22,17 +24,24 @@ CREATE TABLE users (
     role VARCHAR(50) DEFAULT 'user',
     address VARCHAR(255) NOT NULL
 );
+
+ALTER TABLE cart_items 
+ADD CONSTRAINT unique_user_book UNIQUE (user_id, book_id);
+
+CREATE TABLE cart_items (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- Liên kết với bảng users, xóa khi người dùng bị xóa
+    book_id INTEGER NOT NULL REFERENCES books(id) ON DELETE CASCADE, -- Liên kết với bảng books, xóa khi sách bị xóa
+    quantity INTEGER NOT NULL CHECK (quantity > 0) -- Số lượng sản phẩm, phải lớn hơn 0
+);
+
+DROP INDEX IF EXISTS unique_user_book;
+CREATE INDEX unique_user_book ON cart_items (user_id, book_id);
+select * from books 
+select * from cart_items
 select * from users
 drop table users
--- Tạo bảng admin
-CREATE TABLE admin (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(255) UNIQUE NOT NULL,
-    password TEXT NOT NULL
-);
-drop table admin
-INSERT INTO admin (username, password)
-VALUES ('admin', '123');
+drop table cart_items
 INSERT INTO categories (name) VALUES
 ('Kinh tế'),
 ('Sách giáo khoa'),
@@ -56,10 +65,3 @@ INSERT INTO books (title, description, price, stock_quantity,image, category_id)
 ('CHINH PHỤC TIẾNG ANH','Chinh Phục Tiếng Anh - Bí Quyết Nắm Vững Kiến Thức Tiếng Anh Dành Cho Người Mới Bắt Đầu - Sách tổng hợp tất cả các điểm ngữ pháp Tiếng Anh đặc biệt là các nội dung được biên soạn theo chuẩn chương trình sách Tiếng Anh mới.',  45.00, 23, '../images/chinhphuc.jpg',4),
 ('NGỮ PHÁP TIẾNG ANH','Ngữ Pháp Tiếng Anh - Lý Thuyết Và Bài Tập Thực Hành đề cập đến những vấn đề ngữ pháp thông dụng, cần thiết cho người học tiếng Anh ở mọi trình độ. Với lượng kiến thức đầy đủ, phương pháp trình bày khoa học, rõ ràng, dễ hiểu, kèm theo phần ghi chú, giải thích.',  30.00, 29,  '../images/nguphap.jpg',4),
 ('TỪ VỰNG CƠ BẢN', 'Từ Vựng Tiếng Anh Cơ Bản (30 Chủ Đề Phổ Biến Nhất - Sbooks) hướng đến việc đưa ra những từ vựng thông dụng trong các chủ đề thường gặp, bên cạnh đó cuốn sách cũng giới thiệu các mẫu câu cơ bản mang tính thực hành giúp người đọc trau dồi những từ vựng được mình ghi nhớ.', 35.00, 39,  '../images/tuvungcoban.jpg',4);
-
-
-
-
-
-
-
