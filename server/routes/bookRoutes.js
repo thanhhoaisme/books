@@ -88,12 +88,12 @@ router.post('/', authenticateToken, authorizeAdmin, upload.single('image'), asyn
         const result = await pool.query(query, values); 
 
         // Lấy toàn bộ thông tin sách mới (bao gồm cả stock_quantity)
-        const addedBook = result.rows[0];
+        const newBook = result.rows[0];
 
         res.status(201).json({ 
             success: true, 
             message: 'Book added successfully',
-            newBook: addedBook 
+            newBook: newBook 
         });
     } catch (err) {
         console.error('Error adding book:', err);
