@@ -1,7 +1,9 @@
+const jwt = require('jsonwebtoken');
 const express = require('express');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const { pool } = require('../config/db');
+
 // const { authenticateToken } = require('./authMiddleware'); // You might not need this anymore
 
 
@@ -59,13 +61,45 @@ router.post('/login', async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({ error: 'Đăng nhập thất bại' });
         }
+         // Tạo token JWT
+         const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' }); // Ví dụ: token hết hạn sau 1 giờ
 
-        // Send back user information instead of a JWT token
-        res.json({ userId: user.id, role: user.role }); 
+         // Gửi token về cho client
+         res.json({ token }); 
+       
     } catch (error) {
         console.error('Error logging in:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+// API đăng nhập cho admin
+router.post('/admin/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        const query = 'SELECT * FROM admin WHERE username = $1'; // Giả sử bạn có bảng 'admin' riêng
+        const result = await pool.query(query, [username]);
+
+        if (result.rows.length === 0) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        const admin = result.rows[0];
+        const isMatch = await bcrypt.compare(password, admin.password);
+
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign({   
+ userId: admin.id, role: 'admin' }, JWT_SECRET, { expiresIn: '1h' });
+        res.json({ token });
+    } catch (error) {
+        console.error('Error logging in admin:', error.message);
+        res.status(500).json({ error: 'Internal server error'   
+ });
+    }
+});
 
 module.exports = router;
+

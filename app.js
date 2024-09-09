@@ -9,6 +9,7 @@ const pool = require('./server/config/db');
 const userRoutes = require('./server/routes/userRoutes');
 const categoryRoutes= require('./server/routes/categoryRoutes');
 const bookRoutes= require('./server/routes/bookRoutes');
+const adminRoutes = require('./server/routes/adminRoutes');
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -19,7 +20,7 @@ app.use(bodyParser.json());
 app.use('/categories', categoryRoutes);
 app.use('/books', bookRoutes);
 app.use('/users', userRoutes);
-
+app.use('/api/admin', adminRoutes);
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/index.html'));
 });
